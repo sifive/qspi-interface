@@ -10,9 +10,6 @@ int main() {
 	/* Read device ID */
 	const char RDID = 0x9F;
 
-	/* Read device electronic signauture */
-	const char REMS = 0x90;
-
 	/* Iterate over a few device numbers to select the first available SPI device */
 	int number_of_tries = 0;
 	struct metal_spi *spi;
@@ -32,7 +29,7 @@ int main() {
 	puts(buffer);
 
 	/* Initialize SPI device to 100,000 baud rate */
-	metal_spi_init(spi, 100000);
+	metal_spi_init(spi, 10);
 
 	/* CPOL = 0, CPHA = 0, quad spi, MSb-first, CS active low */
 	struct metal_spi_config config = {
@@ -44,13 +41,22 @@ int main() {
 		.csid = 0,
 	};
 
-	/* Instruction for reading identification information of the spansion flash memory */
-	char instruction[4] = {RDID, 0, 0, 0};		
-	char receive_buffer[4] = {0};
-	int transfer_success = metal_spi_transfer(spi, &config, 4, instruction, receive_buffer);
+	/* Send random four bytes to the flash device using the programmable IO interface */
+	/** char instruction[4] = {0x34, 2, 0xef, 0x3b}; */
+	char receive_buffer[4];
+	/** int transfer_success = metal_spi_transfer(spi, &config, 4, instruction, receive_buffer); */
+	/** if (transfer_success != 0) { */
+	/**     puts("spi transfer failed."); */
+	/**     return 1; */
+	/** } */
+
+	/* Send RDID command to the SPI device */
+	char id_instruction[4] = {RDID, 0, 0, 0};
+	int transfer_success = metal_spi_transfer(spi, &config, 4, id_instruction, receive_buffer);
 	if (transfer_success != 0) {
 		puts("spi transfer failed.");
 		return 1;
 	}
+
 	return 0;
 }
